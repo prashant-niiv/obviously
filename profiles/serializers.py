@@ -10,6 +10,9 @@ class PersonSerializer(serializers.ModelSerializer):
     class Meta:
         model = Person
         fields = '__all__'  # Includes all model fields
+        extra_kwargs = {
+            "embedding": {"required": False}  # Not required during create/update
+        }
 
 
 class PersonSearchSerializer(serializers.ModelSerializer):

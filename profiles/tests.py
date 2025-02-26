@@ -1,6 +1,5 @@
 from datetime import date
 
-from django.contrib.auth import get_user_model
 from django.urls import reverse
 
 from rest_framework import status
@@ -139,6 +138,38 @@ class PersonViewSetTests(APITestCase):
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response.data["error"], "Age must be an integer")
+
+    def test_vector_search_by_valid_name(self):
+        """Vector search should return correct results with a valid name."""
+        self.client.credentials(HTTP_AUTHORIZATION=f"Token {self.admin_token.key}")
+        url = reverse("profiles:person-vector-search") + "?name=John"
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIn("message", response.data)
+
+    def test_vector_search_by_missing_name(self):
+        """Vector search should return 400 error if name is not provided."""
+        self.client.credentials(HTTP_AUTHORIZATION=f"Token {self.admin_token.key}")
+        url = reverse("profiles:person-vector-search")
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.data["error"], "Provide at least one name")
+
+    def test_vector_search_no_results(self):
+        """Vector search should return 200 with a no results message when no matches are found."""
+        self.client.credentials(HTTP_AUTHORIZATION=f"Token {self.admin_token.key}")
+        url = reverse("profiles:person-vector-search") + "?name=Unknown"
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data["message"], "No similar persons found")
+
+    def test_vector_search_by_partial_name(self):
+        """Vector search should work with partial names."""
+        self.client.credentials(HTTP_AUTHORIZATION=f"Token {self.admin_token.key}")
+        url = reverse("profiles:person-vector-search") + "?name=Ja"
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIn("message", response.data)
 
 
 class LoginViewTests(APITestCase):

@@ -13,6 +13,7 @@ from profiles.models import Person
 from profiles.pagination import StandardResultsSetPagination
 from profiles.permissions import IsAdminOrGuestUser, IsAdminUser
 from profiles.serializers import PersonSearchSerializer, PersonSerializer
+from profiles.utils import find_similar_persons
 
 
 class LoginView(views.APIView):
@@ -70,3 +71,20 @@ class PersonViewSet(viewsets.ModelViewSet):
         persons = Person.objects.filter(filters).only("first_name", "last_name", "email", "phone", "date_of_birth")
         serializer = PersonSearchSerializer(persons, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+    @action(detail=False, methods=["get"], permission_classes=[IsAdminOrGuestUser])
+    def vector_search(self, request):
+        """
+        API to find similar people based on name embeddings.
+        """
+        name = request.query_params.get("name", "").strip()
+        if not name:
+            return Response({"error": "Provide at least one name"}, status=400)
+
+        persons = find_similar_persons(name)
+
+        if not persons:
+            return Response({"message": "No similar persons found"}, status=200)
+
+        serializer = PersonSearchSerializer(persons, many=True)
+        return Response(serializer.data, status=200)

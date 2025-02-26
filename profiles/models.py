@@ -1,6 +1,8 @@
 from datetime import date
+
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+
 from profiles.choices import Role
 
 
@@ -19,6 +21,7 @@ class Person(AbstractUser):
 
     @property
     def age(self):
+        """Calculate age based on date_of_birth."""
         today = date.today()
         dob = self.date_of_birth
         return today.year - dob.year - ((today.month, today.day) < (dob.month, dob.day))

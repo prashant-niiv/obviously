@@ -1,5 +1,6 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
+
 from profiles.models import Person
 
 
@@ -8,7 +9,7 @@ class PersonAdmin(UserAdmin):
 
     # Fields displayed in the list view
     list_display = ("username", "email", "phone", "date_of_birth", "role", "is_staff", "created_at", "updated_at")
-    
+
     # Fields used for searching
     search_fields = ("username", "email", "phone", "role")
 
@@ -17,7 +18,8 @@ class PersonAdmin(UserAdmin):
 
     # How fields are grouped when editing a user
     fieldsets = (
-        ("Personal Info", {"fields": ("first_name", "last_name", "username", "email", "phone", "date_of_birth", "role")}),
+        ("Personal Info", {"fields": ("first_name", "last_name",
+         "username", "email", "phone", "date_of_birth", "role")}),
         ("Permissions", {"fields": ("is_active", "is_staff", "is_superuser", "groups", "user_permissions")}),
         ("Important Dates", {"fields": ("last_login", "date_joined", "created_at", "updated_at")}),
     )

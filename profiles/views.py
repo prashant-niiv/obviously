@@ -1,15 +1,18 @@
-from rest_framework.authtoken.models import Token
-from rest_framework.permissions import AllowAny
-from profiles.permissions import IsAdminOrGuestUser, IsAdminUser
-from rest_framework.response import Response
-from rest_framework import views, viewsets, status
-from rest_framework.decorators import action
-from django.contrib.auth import authenticate
-from profiles.pagination import StandardResultsSetPagination
-from profiles.serializers import PersonSearchSerializer, PersonSerializer
-from profiles.models import Person
-from django.db.models import Q
 from datetime import date, timedelta
+
+from django.contrib.auth import authenticate
+from django.db.models import Q
+
+from rest_framework import status, views, viewsets
+from rest_framework.authtoken.models import Token
+from rest_framework.decorators import action
+from rest_framework.permissions import AllowAny
+from rest_framework.response import Response
+
+from profiles.models import Person
+from profiles.pagination import StandardResultsSetPagination
+from profiles.permissions import IsAdminOrGuestUser, IsAdminUser
+from profiles.serializers import PersonSearchSerializer, PersonSerializer
 
 
 class LoginView(views.APIView):

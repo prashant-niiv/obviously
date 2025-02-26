@@ -1,7 +1,8 @@
-from django.urls import path, include
-from rest_framework.routers import DefaultRouter
-from profiles.views import LoginView, PersonViewSet
+from django.urls import include, path
 
+from rest_framework.routers import DefaultRouter
+
+from profiles.views import LoginView, PersonViewSet
 
 app_name = 'profiles'  # Namespace for URL reversal
 

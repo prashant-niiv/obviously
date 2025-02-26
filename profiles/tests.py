@@ -1,36 +1,54 @@
+from datetime import date
+
 from django.contrib.auth import get_user_model
 from django.urls import reverse
-from rest_framework.test import APITestCase
+
 from rest_framework import status
 from rest_framework.authtoken.models import Token
-from datetime import date, timedelta
-from profiles.models import Person
-from profiles.choices import Role
+from rest_framework.test import APITestCase
 
-User = get_user_model()
+from profiles.choices import Role
+from profiles.models import Person
+
 
 class PersonViewSetTests(APITestCase):
     def setUp(self):
+        """Set up test data with different user roles."""
+
         # Create an admin user
-        self.admin_user = User.objects.create_superuser(
-            username="admin", password="admin123", email="admin@example.com", role=Role.ADMIN
+        self.admin_user = Person.objects.create(
+            username="admin",
+            first_name="Prince",
+            last_name="Adam",
+            password="admin123",
+            email="admin@example.com",
+            phone="0123456789",
+            date_of_birth=date(1990, 2, 25),
+            role=Role.ADMIN
         )
         self.admin_token = Token.objects.create(user=self.admin_user)
 
         # Create a guest user
-        self.guest_user = User.objects.create_user(
-            username="guest", password="guest123", email="guest@example.com", role=Role.GUEST
+        self.guest_user = Person.objects.create(
+            username="guest",
+            first_name="Scarlet",
+            last_name="Gust",
+            password="guest123",
+            email="guest@example.com",
+            phone="9876543210",
+            date_of_birth=date(1995, 9, 10),
+            role=Role.GUEST
         )
         self.guest_token = Token.objects.create(user=self.guest_user)
 
         # Create a normal user
-        self.person = Person.objects.create(
+        self.person1 = Person.objects.create(
             username="john_doe",
             first_name="John",
             last_name="Doe",
             email="john@example.com",
             phone="1234567890",
-            date_of_birth=date(1990, 5, 15),
+            date_of_birth=date(1992, 5, 15),
             role=Role.GUEST
         )
 
@@ -45,17 +63,23 @@ class PersonViewSetTests(APITestCase):
         )
 
     def test_admin_can_list_persons(self):
-        self.client.credentials(HTTP_AUTHORIZATION=f"Token {self.admin_token.key}")
-        response = self.client.get(reverse("person-list"))
+        """Admin should be able to view all persons."""
+        self.client.credentials(
+            HTTP_AUTHORIZATION=f"Token {self.admin_token.key}")
+        response = self.client.get(reverse("profiles:person-list"))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_guest_cannot_list_persons(self):
-        self.client.credentials(HTTP_AUTHORIZATION=f"Token {self.guest_token.key}")
-        response = self.client.get(reverse("person-list"))
+        """Guest users should not have permission to view persons."""
+        self.client.credentials(
+            HTTP_AUTHORIZATION=f"Token {self.guest_token.key}")
+        response = self.client.get(reverse("profiles:person-list"))
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_admin_can_create_person(self):
-        self.client.credentials(HTTP_AUTHORIZATION=f"Token {self.admin_token.key}")
+        """Admin should be able to create a new person."""
+        self.client.credentials(
+            HTTP_AUTHORIZATION=f"Token {self.admin_token.key}")
         data = {
             "username": "new_user",
             "first_name": "New",
@@ -66,11 +90,13 @@ class PersonViewSetTests(APITestCase):
             "role": Role.GUEST,
             "password": "password123"
         }
-        response = self.client.post(reverse("person-list"), data)
+        response = self.client.post(reverse("profiles:person-list"), data)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
     def test_guest_cannot_create_person(self):
-        self.client.credentials(HTTP_AUTHORIZATION=f"Token {self.guest_token.key}")
+        """Guest users should not be able to create a person."""
+        self.client.credentials(
+            HTTP_AUTHORIZATION=f"Token {self.guest_token.key}")
         data = {
             "username": "new_guest",
             "first_name": "Guest",
@@ -81,29 +107,35 @@ class PersonViewSetTests(APITestCase):
             "role": Role.GUEST,
             "password": "password123"
         }
-        response = self.client.post(reverse("person-list"), data)
+        response = self.client.post(reverse("profiles:person-list"), data)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_person_search_by_first_name(self):
-        self.client.credentials(HTTP_AUTHORIZATION=f"Token {self.admin_token.key}")
-        url = reverse("person-search") + "?first_name=John"
+        """Searching persons by first name should return correct results."""
+        self.client.credentials(
+            HTTP_AUTHORIZATION=f"Token {self.admin_token.key}")
+        url = reverse("profiles:person-search") + "?first_name=John"
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 1)
         self.assertEqual(response.data[0]["first_name"], "John")
 
     def test_person_search_by_age(self):
-        self.client.credentials(HTTP_AUTHORIZATION=f"Token {self.admin_token.key}")
+        """Searching persons by age should return correct results."""
+        self.client.credentials(
+            HTTP_AUTHORIZATION=f"Token {self.admin_token.key}")
         age = date.today().year - 1990
-        url = reverse("person-search") + f"?age={age}"
+        url = reverse("profiles:person-search") + f"?age={age}"
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 1)
-        self.assertEqual(response.data[0]["first_name"], "John")
+        self.assertEqual(response.data[0]["first_name"], "Prince")
 
     def test_invalid_age_in_search(self):
-        self.client.credentials(HTTP_AUTHORIZATION=f"Token {self.admin_token.key}")
-        url = reverse("person-search") + "?age=invalid"
+        """Providing an invalid age should return a 400 error."""
+        self.client.credentials(
+            HTTP_AUTHORIZATION=f"Token {self.admin_token.key}")
+        url = reverse("profiles:person-search") + "?age=invalid"
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response.data["error"], "Age must be an integer")
@@ -111,15 +143,29 @@ class PersonViewSetTests(APITestCase):
 
 class LoginViewTests(APITestCase):
     def setUp(self):
-        self.user = User.objects.create_user(username="testuser", password="testpassword")
-        self.url = reverse("login")
+        """Set up a test user for authentication tests."""
+        self.user = Person.objects.create_user(
+            username="testuser",
+            first_name="Test",
+            last_name="User",
+            password="testpassword",
+            email="test@example.com",
+            phone="1133557799",
+            date_of_birth=date(1996, 12, 23),
+            role=Role.ADMIN
+        )
+        self.url = reverse("profiles:login")
 
     def test_login_successful(self):
-        response = self.client.post(self.url, {"username": "testuser", "password": "testpassword"})
+        """A user with correct credentials should receive a token."""
+        response = self.client.post(
+            self.url, {"username": "testuser", "password": "testpassword"})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIn("token", response.data)
 
     def test_login_unsuccessful(self):
-        response = self.client.post(self.url, {"username": "testuser", "password": "wrongpassword"})
+        """A user with incorrect credentials should get a 400 error."""
+        response = self.client.post(
+            self.url, {"username": "testuser", "password": "wrongpassword"})
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response.data["error"], "Invalid credentials")

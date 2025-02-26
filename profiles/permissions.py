@@ -1,4 +1,5 @@
 from rest_framework.permissions import BasePermission
+
 from profiles.choices import Role
 
 
@@ -10,6 +11,7 @@ class IsAdminUser(BasePermission):
     - Authenticated
     - Role 'ADMIN'
     """
+
     def has_permission(self, request, view):
         return request.user.is_authenticated and request.user.role == Role.ADMIN
 
@@ -22,5 +24,6 @@ class IsAdminOrGuestUser(BasePermission):
     - Authenticated
     - Role either 'ADMIN' or 'GUEST'
     """
+
     def has_permission(self, request, view):
         return request.user.is_authenticated and request.user.role in [Role.ADMIN, Role.GUEST]

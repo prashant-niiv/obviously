@@ -9,9 +9,9 @@ class PersonSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Person
-        fields = '__all__'  # Includes all model fields
+        exclude = ['embedding']  # Exclude embedding field from API response as it's for internal use only
         extra_kwargs = {
-            "embedding": {"required": False}  # Not required during create/update
+            'embedding': {'required': False}  # Not required during create/update
         }
 
 

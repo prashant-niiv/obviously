@@ -25,7 +25,8 @@ SECRET_KEY = 'django-insecure-wf2(1u7#%$+&)eo#luvhtd-49(idjw3*4yu5=#b%v=t@@p4)21
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+# Allow all hosts (change for production)
+ALLOWED_HOSTS = ["*"]
 
 
 # Application definition
@@ -122,11 +123,7 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 
-STATICFILES_DIRS = [
-    BASE_DIR / 'static',
-]
-
-STATIC_ROOT = BASE_DIR / 'staticfiles'
+STATIC_ROOT = BASE_DIR / 'static'
 
 MEDIA_URL = 'media/'
 

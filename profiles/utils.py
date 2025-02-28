@@ -33,7 +33,7 @@ def load_faiss_index(embeddings):
     return index
 
 
-def find_similar_persons(name, top_k=5, threshold=0.5):
+def find_similar_persons(name, top_k=5, threshold=1):
     from profiles.models import Person  # Delayed import to prevent circular import issue
 
     """

@@ -66,17 +66,10 @@ This is a Django-based REST API for managing Person entities. It provides user a
 - `GET /api/profiles/persons/search/?first_name=John&age=30` - Search by name (partial match) and/or age
 
 ## Running with Docker (Optional)
-1. Build the Docker image:
+- Build the Docker image and Run the Container:
    ```sh
-   docker build -t obviously .
-   ```
-2. Run the container:
-   ```sh
-   docker run -p 8000:8000 obviously
+   docker-compose up --build
    ```
 
 ## Vector Search (Optional)
 - `GET /api/profiles/persons/vector_search/?name=John` - Uses a vector database to find similar profiles based on embeddings.
-
-
-

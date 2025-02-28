@@ -42,11 +42,15 @@ This is a Django-based REST API for managing Person entities. It provides user a
    ```sh
    python manage.py migrate
    ```
-5. Create superuser:
+5. Load initial data:
+   ```sh
+   python manage.py loaddata person.json
+   ```
+6. Create superuser:
    ```sh
    python manage.py createsuperuser
    ```
-6. Run the development server:
+7. Run the development server:
    ```sh
    python manage.py runserver
    ```
